@@ -18,7 +18,7 @@
 		<junit.version>4.13</junit.version>
 		<rock.version>1.0.0</rock.version>
 		<spring.version>5.2.5.RELEASE</spring.version>
-		<slf4j-api.version>1.7.30</slf4j-api.version>
+<!--		<slf4j-api.version>1.7.30</slf4j-api.version>-->
 		<!--<slf4j-nop.version>1.7.30</slf4j-nop.version>-->
 		<logback-classic.version>1.2.3</logback-classic.version>
 		<lombok.version>1.18.28</lombok.version>
@@ -49,11 +49,11 @@
 			<artifactId>rock-core</artifactId>
 			<version>${rock.version}</version>
 		</dependency>
-		<dependency>
-			<groupId>org.slf4j</groupId>
-			<artifactId>slf4j-api</artifactId>
-			<version>${slf4j-api.version}</version>
-		</dependency>
+<!--		<dependency>-->
+<!--			<groupId>org.slf4j</groupId>-->
+<!--			<artifactId>slf4j-api</artifactId>-->
+<!--			<version>${slf4j-api.version}</version>-->
+<!--		</dependency>-->
 		<!--<dependency>
 			<groupId>org.slf4j</groupId>
 			<artifactId>slf4j-nop</artifactId>
