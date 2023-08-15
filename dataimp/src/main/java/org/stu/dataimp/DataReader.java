@@ -26,6 +26,17 @@ public interface DataReader extends Closeable {
 	 */
 	public static final String METADATA_DATAFILE_KEY = "meta.datafile";
 	
+	
+	/**
+	 * row
+	 */
+	public static final String METADATA_ROW_VAR_PREFIX = "__";
+	public static final String METADATA_ROW_TABLE_KEY = "__table";
+	public static final String METADATA_ROW_RECORDNUMBER_KEY = "__recordNumber";
+	public static final String METADATA_ROW_SEQNO_KEY = "__seqno";
+	
+	
+	
 	/**
 	 * <b>获得行数。</b>
 	 * <p><b>详细说明：</b></p>

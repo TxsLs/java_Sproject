@@ -3,9 +3,11 @@ package org.stu.dataimp;
 import java.io.File;
 import java.io.IOException;
 import java.nio.charset.Charset;
+import java.text.Format;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -19,12 +21,14 @@ import org.apache.commons.csv.CSVFormat.Builder;
 import org.apache.commons.csv.CSVParser;
 import org.apache.commons.csv.CSVRecord;
 import org.apache.commons.io.FilenameUtils;
-import org.apache.commons.lang3.mutable.MutableInt;
+import org.apache.commons.lang3.mutable.MutableLong;
+import org.apache.commons.text.StringEscapeUtils;
 import org.quincy.rock.core.bean.BeanUtil;
 import org.quincy.rock.core.lang.DataType;
 import org.quincy.rock.core.util.IOUtil;
 import org.quincy.rock.core.util.MapUtil;
 import org.quincy.rock.core.util.StringUtil;
+import org.stu.dataimp.ParseFileException.FieldError;
 
 /**
  * <b>CSVDataReader。</b>
@@ -36,10 +40,13 @@ import org.quincy.rock.core.util.StringUtil;
  * @author mex2000
  * @since 1.0
  */
+@SuppressWarnings({ "unchecked", "rawtypes" })
+
 public class CSVDataReader implements DataReader {
 	protected File csvFile;
 	protected CSVFormat csvFormat;
 	protected Charset charset;
+	private Map<String, Object> config;
 
 	/**
 	 * <b>构造方法。</b>
@@ -56,18 +63,18 @@ public class CSVDataReader implements DataReader {
 		this.csvFile = csvFile;
 		this.csvFormat = csvFormat == null ? CSVFormat.DEFAULT : csvFormat;
 		this.charset = cs == null ? Charset.defaultCharset() : cs;
-		loadConfig(cfgFile);
+		this.config = loadConfig(cfgFile);
 	}
 
 	protected Map<String, Object> loadConfig(File cfgFile) throws IOException {
 		//装载配置文件
 		Map<String, Object> config = new HashMap<>();
-		int maxIndex;
-		if (cfgFile != null && cfgFile.isFile()) {
+		int maxIndex= loadConfig0(cfgFile, config);
+		/*if (cfgFile != null && cfgFile.isFile()) {
 			maxIndex = loadConfig0(cfgFile, config);
 		} else {
 			maxIndex = this.loadEmptyConfig(config);
-		}
+		}*/
 		if (maxIndex > 0)
 			this.initCSVHeader(maxIndex, config);
 		return config;
@@ -76,7 +83,10 @@ public class CSVDataReader implements DataReader {
 	//装载配置文件
 	private int loadConfig0(File cfgFile, Map<String, Object> config) throws IOException {
 		String str;
-		Properties props = IOUtil.loadProperties(cfgFile, StringUtil.UTF_8.name());
+		//Properties props = IOUtil.loadProperties(cfgFile, StringUtil.UTF_8.name());
+
+		Properties props = IOUtil.loadProperties(cfgFile, "GBK");
+
 		//csv
 		Builder builder = this.csvFormat.builder();
 		str = props.getProperty("csv.ignoreEmptyLines");
@@ -107,6 +117,10 @@ public class CSVDataReader implements DataReader {
 		if (str != null) {
 			builder.setNullString(str);
 		}
+		
+		
+		builder.setAllowMissingColumnNames(true);
+		
 		this.csvFormat = builder.build();
 
 		//table
@@ -230,7 +244,7 @@ public class CSVDataReader implements DataReader {
 		return maxColIndex;
 	}
 
-	//装载空配置
+	/*//装载空配置
 	private int loadEmptyConfig(Map<String, Object> config) throws IOException {
 		//csvFormat
 		Builder builder = this.csvFormat.builder();
@@ -245,7 +259,7 @@ public class CSVDataReader implements DataReader {
 		table.firstRowIndex = 1;
 		table.lastRowIndex = -1;
 		table.totalCount = -1;
-
+	
 		//field
 		MutableInt maxIndex = new MutableInt(0);
 		List<Field> fieldList = new ArrayList<Field>();
@@ -266,7 +280,7 @@ public class CSVDataReader implements DataReader {
 		table.fields = fieldList.toArray(new Field[fieldList.size()]);
 		config.put(METADATA_TABLES_KEY, new Table[] { table });
 		return maxIndex.intValue();
-	}
+	}*/
 
 	private void initCSVHeader(int maxIndex, Map<String, Object> config) {
 		//withHeaderName
@@ -275,6 +289,7 @@ public class CSVDataReader implements DataReader {
 		List<Field> fieldList = Arrays.asList(table.fields);
 		if (!fieldList.isEmpty()) {
 			String[] headerNames = new String[maxIndex + 1];
+			
 			Map<Integer, String> map = (Map) BeanUtil.getMap(fieldList, "colIndex", "name", false);
 			for (int i = 0; i <= maxIndex; i++) {
 				String name = map.get(i);
@@ -343,8 +358,16 @@ public class CSVDataReader implements DataReader {
 	 */
 	@Override
 	public long getRowCount() throws IOException {
-		// TODO Auto-generated method stub
-		return 0;
+		Table table = getTable(getConfig());
+		if (table.totalCount > 0)
+			return table.totalCount;
+		MutableLong rowCount = new MutableLong(0);
+		this.forEach(table.firstRowIndex, table.lastRowIndex, (index, record) -> {
+			rowCount.increment();
+			return Boolean.TRUE;
+		}, (ex) -> {
+		});
+		return rowCount.longValue();
 	}
 
 	/** 
@@ -354,7 +377,7 @@ public class CSVDataReader implements DataReader {
 	@Override
 	public Map<String, Object> getConfig() {
 		// TODO Auto-generated method stub
-		return null;
+		return this.config;
 	}
 
 	/** 
@@ -363,8 +386,12 @@ public class CSVDataReader implements DataReader {
 	 */
 	@Override
 	public void forEach(Function<String, Boolean> callback) throws IOException {
-		// TODO Auto-generated method stub
-
+		Table table = getTable(getConfig());
+		this.forEach(table.firstRowIndex, table.lastRowIndex, (index, record) -> {
+			StringBuilder sb = joinRowString(record, new StringBuilder());
+			return callback.apply(sb.toString());
+		}, (ex) -> {
+		});
 	}
 
 	/** 
@@ -374,10 +401,48 @@ public class CSVDataReader implements DataReader {
 	@Override
 	public void forEach(Consumer<Map<String, Object>> callback, Consumer<ParseFileException> catchParseError)
 			throws IOException {
-		// TODO Auto-generated method stub
-
+		Table table = getTable(getConfig());
+		Map<Integer, Field> fieldMap = (Map) BeanUtil.getMap(Arrays.asList(table.fields), "colIndex", null, false);
+		System.out.println(fieldMap);
+		this.forEach(table.firstRowIndex, table.lastRowIndex, (rowIndex, record) -> {
+			parseRowRecord(table, fieldMap, rowIndex, record, callback, catchParseError);
+			return Boolean.TRUE;
+		}, catchParseError);
 	}
 
+	private void parseRowRecord(Table table, Map<Integer, Field> fieldMap, long rowIndex, CSVRecord record,
+			Consumer<Map<String, Object>> callback, Consumer<ParseFileException> catchParseError) {
+		Map<String, Object> map = new HashMap<String, Object>();
+		map.put(METADATA_ROW_RECORDNUMBER_KEY, record.getRecordNumber());
+		map.put(METADATA_ROW_TABLE_KEY, table);
+		for (int colIndex = 0, len = record.size(); colIndex < len; colIndex++) {
+			Field field = fieldMap.get(colIndex);
+			if (field != null) {
+				String colName = field.getName();
+				String strValue = record.get(colIndex);
+				DataType dataType = field == null ? null : field.dataType;
+				Format fmt = field == null ? null : field.format();
+				try {
+					Object value = (strValue == null || dataType == null || dataType == DataType.STRING
+							|| dataType == DataType.CLOB || dataType == DataType.UNKNOW) ? strValue
+									: dataType.parse(strValue, fmt, true);
+					map.put(colName, value);
+				} catch (Exception e) {
+					FieldError errField = new FieldError(field.colIndex, field.name, strValue, e);
+					String line = joinRowString(record, new StringBuilder()).toString();
+					ParseFileException ex = new ParseFileException(csvFile.getAbsolutePath(), rowIndex, line, errField);
+					catchParseError.accept(ex);
+				}
+			}			
+		}
+		callback.accept(map);
+	}
+
+	
+	
+	
+	
+	
 	/**
 	 * <b>获得表元数据信息。</b>
 	 * <p><b>详细说明：</b></p>
@@ -390,4 +455,32 @@ public class CSVDataReader implements DataReader {
 		Table[] tables = MapUtil.getObject(config, METADATA_TABLES_KEY);
 		return tables[0];
 	}
+	
+	
+	
+	/**
+	 * <b>拼接行字符串。</b>
+	 * <p><b>详细说明：</b></p>
+	 * <!-- 在此添加详细说明 -->
+	 * 无。
+	 * @param record 行记录
+	 * @param buf 缓冲区
+	 * @return 缓冲区
+	 */
+	public static StringBuilder joinRowString(CSVRecord record, StringBuilder buf) {
+		String str;
+		Iterator<String> iter = record.iterator();
+
+		if (iter.hasNext()) {
+			str = StringEscapeUtils.escapeCsv(iter.next());
+			buf.append(str == null ? StringUtil.EMPTY : str);
+		}
+		while (iter.hasNext()) {
+			buf.append(StringUtil.CHAR_COMMA);
+			str = StringEscapeUtils.escapeCsv(iter.next());
+			buf.append(str == null ? StringUtil.EMPTY : str);
+		}
+		return buf;
+	}
+	
 }
