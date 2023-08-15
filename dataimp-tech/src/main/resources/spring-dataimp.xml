@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns="http://www.springframework.org/schema/beans"
+	xmlns:context="http://www.springframework.org/schema/context"
+	xmlns:tx="http://www.springframework.org/schema/tx"
+	xmlns:p="http://www.springframework.org/schema/p"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans 
+       http://www.springframework.org/schema/beans/spring-beans.xsd
+       http://www.springframework.org/schema/context
+       http://www.springframework.org/schema/context/spring-context.xsd
+       http://www.springframework.org/schema/tx
+       http://www.springframework.org/schema/tx/spring-tx.xsd">
+	<!-- 引入properties文件 -->
+	<context:property-placeholder location="classpath:dataimp-config.properties" />
+
+<context:component-scan base-package="org.teach.study.dataimp.bean"></context:component-scan>
+
+
+	<!-- 数据源 -->
+	<bean id="dataSource"
+		class="com.alibaba.druid.pool.DruidDataSource" init-method="init"
+		destroy-method="close">
+		<!-- 设置JDBC驱动名称 -->
+		<property name="driverClassName" value="${jdbc.driver}" />
+		<!-- 设置JDBC连接URL -->
+		<property name="url" value="${jdbc.url}" />
+		<!-- 设置数据库用户名 -->
+		<property name="username" value="${jdbc.username}" />
+		<!-- 设置数据库密码 -->
+		<property name="password" value="${jdbc.password}" />
+
+		<!-- 主要连接池参数信息 -->
+		<property name="defaultAutoCommit" value="false" />
+		<!-- 初始连接数 -->
+		<property name="initialSize" value="${jdbc.minPoolSize}" />
+		<!-- 连接池中的最小空闲连接数 -->
+		<property name="minIdle" value="${jdbc.minPoolSize}" />
+		<!-- 连接池能达到的最大规模(包含空闲连接的数量和使用中的连接数量) -->
+		<property name="maxActive" value="${jdbc.maxPoolSize}" />
+		<!-- 保持 -->
+		<property name="keepAlive" value="true" />
+		<!-- 测试语句 -->
+		<property name="validationQuery" value="${jdbc.testSql}" />
+		<property name="testOnBorrow" value="false" />
+		<property name="testOnReturn" value="false" />
+		<property name="testWhileIdle" value="true" />
+	</bean>
+
+	<!-- 确保注解DAO的 持久化异常翻译成Spring的异常 -->
+	<bean
+		class="org.springframework.dao.annotation.PersistenceExceptionTranslationPostProcessor">
+	</bean>
+
+	<!-- 声名式事务配置 -->
+	<bean id="txManager" class="org.springframework.jdbc.datasource.DataSourceTransactionManager"
+		p:dataSource-ref="dataSource">
+	</bean>
+	<tx:annotation-driven transaction-manager="txManager" />
+	
+	<!-- spring JdbcTemplate 设置 -->
+	<bean id="jdbcTemplate" class="org.springframework.jdbc.core.JdbcTemplate">
+		<property name="dataSource" ref="dataSource" />
+	</bean>
+	
+	<!-- 手动JdbcDao支持类，根据构造函数自动注入JdbcTemplate和SQL语句仓库 -->
+	<bean id="manualJdbcDaoSupport" class="org.quincy.rock.core.dao.ManualJdbcDaoSupport"
+		autowire="constructor" primary="true">
+	</bean>
+</beans>
