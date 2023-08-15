@@ -134,6 +134,9 @@ public class App {
 			for (int i = 1; i <= rowCount; i++) {
 				writer.write(String.valueOf(i));
 				writer.write(StringUtil.CHAR_COMMA);
+				writer.write(String.valueOf(StringUtil.random().nextInt(100) + 100)+"code");
+				writer.write(StringUtil.CHAR_COMMA);
+				
 				writer.write("分割文件！");
 				writer.write(String.valueOf(i));
 				writer.write(StringUtil.CHAR_COMMA);
