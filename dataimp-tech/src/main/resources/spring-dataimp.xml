@@ -11,9 +11,14 @@
        http://www.springframework.org/schema/tx
        http://www.springframework.org/schema/tx/spring-tx.xsd">
 	<!-- 引入properties文件 -->
-	<context:property-placeholder location="classpath:dataimp-config.properties" />
+	<context:property-placeholder
+		location="classpath:dataimp-config.properties" />
+	<!-- 导入sql语句 -->
+	<import resource="spring-datatimp-sql.xml" />
 
-<context:component-scan base-package="org.teach.study.dataimp.bean"></context:component-scan>
+
+	<context:component-scan
+		base-package="org.teach.study.dataimp.bean" />
 
 
 	<!-- 数据源 -->
@@ -52,18 +57,22 @@
 	</bean>
 
 	<!-- 声名式事务配置 -->
-	<bean id="txManager" class="org.springframework.jdbc.datasource.DataSourceTransactionManager"
+	<bean id="txManager"
+		class="org.springframework.jdbc.datasource.DataSourceTransactionManager"
 		p:dataSource-ref="dataSource">
 	</bean>
-	<tx:annotation-driven transaction-manager="txManager" />
-	
+	<tx:annotation-driven
+		transaction-manager="txManager" />
+
 	<!-- spring JdbcTemplate 设置 -->
-	<bean id="jdbcTemplate" class="org.springframework.jdbc.core.JdbcTemplate">
+	<bean id="jdbcTemplate"
+		class="org.springframework.jdbc.core.JdbcTemplate">
 		<property name="dataSource" ref="dataSource" />
 	</bean>
-	
+
 	<!-- 手动JdbcDao支持类，根据构造函数自动注入JdbcTemplate和SQL语句仓库 -->
-	<bean id="manualJdbcDaoSupport" class="org.quincy.rock.core.dao.ManualJdbcDaoSupport"
+	<bean id="manualJdbcDaoSupport"
+		class="org.quincy.rock.core.dao.ManualJdbcDaoSupport"
 		autowire="constructor" primary="true">
 	</bean>
 </beans>

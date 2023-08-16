@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns="http://www.springframework.org/schema/beans"
+	xmlns:context="http://www.springframework.org/schema/context"
+	xmlns:p="http://www.springframework.org/schema/p"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans 
+       http://www.springframework.org/schema/beans/spring-beans.xsd
+       http://www.springframework.org/schema/context
+       http://www.springframework.org/schema/context/spring-context.xsd">
+
+	<!-- sql语句仓库 -->
+	<bean id="sqlStorage4JDBC"
+		class="org.quincy.rock.core.dao.ManualJdbcDaoSupport.JdbcNamedSqlStorage">
+		<property name="namedSqls">
+			<props>
+				<!-- 建表语句 -->
+				<prop key="create_table.s_user">
+					<![CDATA[
+						CREATE TABLE {0} (
+							`f_id`  bigint NOT NULL ,
+							`f_code`  varchar(50) ,
+							`f_name`  varchar(50) ,
+							`f_birthday` date NULL DEFAULT NULL ,
+							`f_salary`  decimal(10,2) NULL DEFAULT NULL ,
+							`f_descr`  varchar(255) NULL DEFAULT NULL ,
+							PRIMARY KEY (`f_id`)
+						)
+					]]>
+				</prop>
+				<!-- 建表语句 -->
+				<prop key="create_table.t_user1">
+					<![CDATA[
+						CREATE TABLE {0} (
+							`f_id`  bigint NOT NULL ,
+							`f_name`  varchar(50) ,
+							`f_birthday` date NULL DEFAULT NULL ,
+							`f_salary`  decimal(10,2) NULL DEFAULT NULL ,
+							`f_descr`  varchar(255) NULL DEFAULT NULL ,
+							PRIMARY KEY (`f_id`)
+						)
+					]]>
+				</prop> 
+			</props>
+		</property>
+	</bean>
+</beans>

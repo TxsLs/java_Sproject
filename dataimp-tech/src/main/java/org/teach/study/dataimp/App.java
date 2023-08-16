@@ -32,7 +32,6 @@ import org.quincy.rock.core.util.RockUtil;
 import org.quincy.rock.core.util.StringUtil;
 import org.springframework.context.support.MessageSourceAccessor;
 
-
 /**
  * Hello world!
  *
@@ -163,10 +162,10 @@ public class App {
 		processService.setName("dataImportService");
 		processService.setTimeout(30);
 		//
-		processService.setProcessor( context.getBean(Processor.class));
-		
+		processService.setProcessor(context.getBean(Processor.class));
+		//processService.setProcessor((Processor) context.context().getBean("def"));
 		processService.start();
-		
+
 	}
 
 	/**
@@ -177,7 +176,7 @@ public class App {
 	 */
 	private synchronized static void stopProcessService() {
 		if (processService != null) {
-			
+
 			processService.waitAllDone();
 			processService.destroy();
 			processService = null;
@@ -326,9 +325,11 @@ public class App {
 	private static void putDataPackage(List<Map<String, Object>> batchPackage) {
 		if (batchPackage.size() == 0)
 			return;
-		System.out.println(batchPackage.size());
+		
+		//System.out.println(batchPackage.size());
+		
 		//放入处理队列
-	processService.put(pkgno++, batchPackage);
+		processService.put(pkgno++, batchPackage);
 	}
 
 	/**
