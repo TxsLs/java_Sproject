@@ -35,6 +35,6 @@ public class Love extends Entity {
 	private String name;
 
 	@ApiModelProperty(value = "备注", position = 3)
-	private String desc;
+	private String descr;
 
 }

@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="org.stu.boot1.dao.JobDao">
+	<resultMap id="resultMap" type="Job">
+		<id property="id" column="f_id" javaType="long" />
+		<result property="code" column="f_code" javaType="string" />
+		<result property="name" column="f_name" javaType="string" />
+		<result property="descr" column="f_descr" javaType="string" />
+	</resultMap>
+	
+	<insert id="insert">
+		insert into t_job (f_id,f_code,f_name,f_descr) values (#{id},#{code},#{name},#{descr})
+	</insert>
+	
+	<update id="update">
+		update t_job set f_code=#{code},f_name=#{name},f_descr=#{descr} where f_id=#{id}
+	</update>
+	
+	<select id="findAll" resultMap="resultMap">
+		select * from t_job
+	</select>
+	
+	<select id="findOne" resultMap="resultMap">
+		select * from t_job where f_id=#{id}
+	</select>
+	
+	<select id="findByName" resultMap="resultMap">
+		select * from t_job where ${name}=#{value}
+	</select>
+	
+	<delete id="delete">
+		delete from t_job where f_id=#{id}
+	</delete>
+	
+	<delete id="deleteMore">
+		delete from t_job where f_id in	 
+		<foreach index="i" item="id" open="(" close=")" separator=","
+			collection="list">
+			#{id}
+		</foreach>
+	</delete>	
+</mapper>

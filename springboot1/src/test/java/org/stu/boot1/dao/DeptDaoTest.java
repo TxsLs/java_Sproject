@@ -50,7 +50,7 @@ public class DeptDaoTest {
 		vo.setId(13L);
 		vo.setCode("sxc");
 		vo.setName("txs");
-		vo.setDesc("wadsasd111");
+		vo.setDescr("wadsasd111");
 		int i = dao.insert(vo);
 		Assertions.assertEquals(i, 1);
 		System.out.println(i);
@@ -62,7 +62,7 @@ public class DeptDaoTest {
 		vo.setId(13L);
 		vo.setCode("gengx");
 		vo.setName("txs");
-		vo.setDesc("wagengxinxxxx111");
+		vo.setDescr("wagengxinxxxx111");
 		int i = dao.update(vo);
 		Assertions.assertEquals(i, 1);
 		System.out.println(i);
