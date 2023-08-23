@@ -52,4 +52,14 @@ mybatis:
          
 logging:
   config: classpath:logback.xml  
+  
+rock:
+  idgen:
+    table: seqgen
+    cache: 5
+    initial: 1000
+    key-field-name: f_seqname
+    value-field-name: f_seqvalue
+  
+  
       

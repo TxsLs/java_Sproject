@@ -12,6 +12,8 @@ import org.stu.boot1.Dao;
 import org.stu.boot1.entity.Dept;
 import org.stu.boot1.entity.Job;
 
+import com.github.pagehelper.Page;
+
 /**
  * <b>JobDao。</b>
  * <p><b>详细说明：</b></p>
@@ -37,7 +39,16 @@ public interface JobDao extends Dao<Job> {
 	 */
 	public int deleteMore(List<Long> ids);
 	
-	
+	/**
+	 * <b>组合条件查询。</b>
+	 * <p><b>详细说明：</b></p>
+	 * <!-- 在此添加详细说明 -->
+	 * 无。
+	 * @param code 编码(支持like)，允许null
+	 * @param name 名称(支持like)，允许null
+	 * @return 一页数据列表
+	 */
+	public Page<Job> findPageByCondition(String code, String name);
 	
 	
 	

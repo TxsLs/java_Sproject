@@ -3,7 +3,9 @@ package org.stu.boot1.bootController;
 import java.util.Arrays;
 import java.util.List;
 
+import org.quincy.rock.core.vo.PageSet;
 import org.quincy.rock.core.vo.Result;
+import org.quincy.rock.core.vo.Sort;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -12,6 +14,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.stu.boot1.BaseController;
+import org.stu.boot1.Entity;
 import org.stu.boot1.dao.DeptDao;
 import org.stu.boot1.dao.JobDao;
 import org.stu.boot1.entity.Dept;
@@ -112,5 +115,22 @@ public class JobController extends BaseController<Job,JobService>{
 		int result = this.getService().deleteMore(Arrays.asList(id));
 		return Result.of(result > 0);
 	}
+	
+	@ApiOperation(value = "条件分页查询", notes = "")
+	@ApiImplicitParams({ @ApiImplicitParam(name = "searchCode", value = "代码(支持like)，允许null"),
+			@ApiImplicitParam(name = "searchName", value = "名称(支持like)，允许null"),
+			@ApiImplicitParam(name = "sort", value = "排序规则字符串"),
+			@ApiImplicitParam(name = "pageNum", value = "页码", required = true, dataType = "int"),
+			@ApiImplicitParam(name = "pageSize", value = "页大小", required = true, dataType = "int") })
+	@RequestMapping(value = "/queryPageByCondition", method = { RequestMethod.GET })
+	public @ResponseBody Result<PageSet<? extends Entity>> queryPageByCondition(String searchCode, String searchName,
+			String sort, @RequestParam("pageNum") int pageNum, @RequestParam int pageSize) {
+		log.debug("call queryPageByCondition");
+		PageSet<? extends Entity> ps = this.getService().findPageByCondition(searchCode, searchName, Sort.parse(sort),
+				pageNum, pageSize);
+		return Result.toResult(ps);
+	}
+	
+	
 	
 }

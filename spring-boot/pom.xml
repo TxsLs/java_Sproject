@@ -1,36 +1,32 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0"
-	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 	<parent>
 		<groupId>org.springframework.boot</groupId>
 		<artifactId>spring-boot-starter-parent</artifactId>
 		<version>2.7.14</version>
-		<relativePath /> <!-- lookup parent from repository -->
+		<relativePath/> <!-- lookup parent from repository -->
 	</parent>
-	<groupId>org.stu</groupId>
-	<artifactId>springboot1</artifactId>
+	<groupId>org.teach.study</groupId>
+	<artifactId>spring-boot</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
-	<name>springboot1</name>
-	<description>Demo project for Spring Boot</description>
+	<name>spring-boot</name>
+	<description>学习Spring Boot</description>
 	<properties>
 		<java.version>1.8</java.version>
 		<rock.version>1.0.0</rock.version>
-		<commons-io.version>2.8.0</commons-io.version>
 		<swagger2.version>2.9.2</swagger2.version>
+		<commons-io.version>2.13.0</commons-io.version>
 	</properties>
 	<dependencies>
-		
-		<dependency>
-			<groupId>com.github.pagehelper</groupId>
-			<artifactId>pagehelper-spring-boot-starter</artifactId>
-			<version>1.4.7</version>
-		</dependency>
-		
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-jdbc</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-security</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
@@ -41,7 +37,33 @@
 			<artifactId>mybatis-spring-boot-starter</artifactId>
 			<version>2.3.1</version>
 		</dependency>
-
+		<dependency>
+			<groupId>com.github.pagehelper</groupId>
+			<artifactId>pagehelper-spring-boot-starter</artifactId>
+			<version>1.4.7</version>
+		</dependency>
+		<dependency>
+			<groupId>org.quincy.rock</groupId>
+			<artifactId>rock-core</artifactId>
+			<version>${rock.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>commons-io</groupId>
+			<artifactId>commons-io</artifactId>
+			<version>${commons-io.version}</version>
+		</dependency>
+		<!--swagger2 begin-->
+		<dependency>
+			<groupId>io.springfox</groupId>
+			<artifactId>springfox-swagger2</artifactId>
+			<version>${swagger2.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>io.springfox</groupId>
+			<artifactId>springfox-swagger-ui</artifactId>
+			<version>${swagger2.version}</version>
+		</dependency>
+		<!--swagger2 end-->
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-devtools</artifactId>
@@ -74,32 +96,11 @@
 			<version>2.3.1</version>
 			<scope>test</scope>
 		</dependency>
-
-		<!--swagger2 begin-->
 		<dependency>
-			<groupId>io.springfox</groupId>
-			<artifactId>springfox-swagger2</artifactId>
-			<version>${swagger2.version}</version>
+			<groupId>org.springframework.security</groupId>
+			<artifactId>spring-security-test</artifactId>
+			<scope>test</scope>
 		</dependency>
-		<dependency>
-			<groupId>io.springfox</groupId>
-			<artifactId>springfox-swagger-ui</artifactId>
-			<version>${swagger2.version}</version>
-		</dependency>
-		<!--swagger2 end-->
-
-		<dependency>
-			<groupId>org.quincy.rock</groupId>
-			<artifactId>rock-core</artifactId>
-			<version>${rock.version}</version>
-		</dependency>
-
-		<dependency>
-			<groupId>commons-io</groupId>
-			<artifactId>commons-io</artifactId>
-			<version>${commons-io.version}</version>
-		</dependency>
-
 	</dependencies>
 
 	<build>

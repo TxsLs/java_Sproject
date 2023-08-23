@@ -31,6 +31,24 @@
 		select * from t_job where ${name}=#{value}
 	</select>
 	
+	<sql id="whereSql">
+		<where>
+			<if test="code!=null and code!=''">
+				<bind name="pcode" value="'%'+code+'%'" />
+				and f_code like #{pcode}
+			</if>
+			<if test="name!=null and name!=''">
+				<bind name="pname" value="'%'+name+'%'" />
+				and f_name like #{pname}
+			</if>
+		</where>
+	</sql>
+	
+	<select id="findPageByCondition" resultMap="resultMap">
+		select * from t_job 
+		<include refid="whereSql" />	
+	</select>
+	
 	<delete id="delete">
 		delete from t_job where f_id=#{id}
 	</delete>
