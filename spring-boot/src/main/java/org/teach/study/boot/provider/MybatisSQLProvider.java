@@ -44,7 +44,6 @@ public class MybatisSQLProvider {
 	public static final String SORT_VAR_NAME = "sort";
 	public static final String TABLE_PREFIX = "t_";
 	public static final String FIELD_PREFIX = "f_";
-	public static final String ID_FIELD_NAME = "f_id";
 	public static final char SEPARATOR = StringUtil.CHAR_UNDERLINE;
 
 	public static final Function<String, String, RuntimeException> CONVERTER_TABLE_NAME = (objName) -> StringUtil
@@ -54,12 +53,18 @@ public class MybatisSQLProvider {
 
 	private final static Map<String, EntityMetadata> entiMataMap = new HashMap<>();
 
+	/**
+	 * sqlQuote。
+	 */
+	public static String sqlQuote = null;
+
 	public String deleteById(Map<String, Object> paramMap) {
 		Class clazz = getParamValue(paramMap, ENTITY_TYPE_VAR_NAME, "param1");
 		String idVarName = getParamName(paramMap, ID_VAR_NAME, "param2");
 		EntityMetadata meta = getEntityMetadata4Select(clazz);
-		StringBuilder sb = new StringBuilder("delete from ").append(meta.tableName()).append(" where ")
-				.append(ID_FIELD_NAME).append("=#{").append(idVarName).append('}');
+		String pkName = meta.pKName();
+		StringBuilder sb = new StringBuilder("delete from ").append(surround(meta.tableName())).append(" where ")
+				.append(surround(meta.columnName(pkName))).append("=#{").append(idVarName).append('}');
 		return sb.toString();
 	}
 
@@ -67,35 +72,39 @@ public class MybatisSQLProvider {
 		Class clazz = getParamValue(paramMap, ENTITY_TYPE_VAR_NAME, "param1");
 		Iterator<? extends Number> it = ((Iterable) getParamValue(paramMap, "ids", "param2")).iterator();
 		EntityMetadata meta = getEntityMetadata4Select(clazz);
-		SQL sql = new SQL().DELETE_FROM(meta.tableName()).WHERE(whereInById(it));
+		String pkName = meta.pKName();
+		SQL sql = new SQL().DELETE_FROM(surround(meta.tableName()).toString())
+				.WHERE(whereInById(surround(meta.columnName(pkName)), it));
 		return sql.toString();
 	}
 
 	public String deleteAll(Class<?> clazz) {
 		EntityMetadata meta = getEntityMetadata4Select(clazz);
-		SQL sql = new SQL().DELETE_FROM(meta.tableName());
+		SQL sql = new SQL().DELETE_FROM(surround(meta.tableName()).toString());
 		return sql.toString();
 	}
 
 	public String total(Class<?> clazz) {
 		EntityMetadata meta = getEntityMetadata4Select(clazz);
-		return "select count(*) from " + meta.tableName();
+		return "select count(*) from " + surround(meta.tableName());
 	}
 
 	public String countByIds(Map<String, Object> paramMap) {
 		Class clazz = getParamValue(paramMap, ENTITY_TYPE_VAR_NAME, "param1");
 		Iterator<? extends Number> it = ((Iterable) getParamValue(paramMap, "ids", "param2")).iterator();
 		EntityMetadata meta = getEntityMetadata4Select(clazz);
-		StringBuilder sql = new StringBuilder("select count(*) from ").append(meta.tableName()).append(" where ")
-				.append(whereInById(it));
+		String pkName = meta.pKName();
+		StringBuilder sql = new StringBuilder("select count(*) from ").append(surround(meta.tableName()))
+				.append(" where ").append(whereInById(surround(meta.columnName(pkName)), it));
 		return sql.toString();
 	}
 
 	public String findById(Map<String, Object> paramMap) {
 		Class clazz = getParamValue(paramMap, ENTITY_TYPE_VAR_NAME, "param1");
-		EntityMetadata meta = getEntityMetadata4Select(clazz);
 		String idVarName = getParamName(paramMap, ID_VAR_NAME, "param2");
-		StringBuilder sql = getSelectSQL(meta).append(" where ").append(ID_FIELD_NAME).append("=#{").append(idVarName)
+		EntityMetadata meta = getEntityMetadata4Select(clazz);
+		String pkColName = meta.columnName(meta.pKName(), colName -> surround(colName));
+		StringBuilder sql = getSelectSQL(meta).append(" where ").append(pkColName).append("=#{").append(idVarName)
 				.append('}');
 		return sql.toString();
 	}
@@ -104,7 +113,8 @@ public class MybatisSQLProvider {
 		Class clazz = getParamValue(paramMap, ENTITY_TYPE_VAR_NAME, "param1");
 		Iterator<? extends Number> it = ((Iterable) getParamValue(paramMap, "ids", "param2")).iterator();
 		EntityMetadata meta = getEntityMetadata4Select(clazz);
-		StringBuilder sql = getSelectSQL(meta).append(" where ").append(whereInById(it));
+		String pkColName = meta.columnName(meta.pKName(), colName -> surround(colName));
+		StringBuilder sql = getSelectSQL(meta).append(" where ").append(whereInById(pkColName, it));
 		return sql.toString();
 	}
 
@@ -112,7 +122,10 @@ public class MybatisSQLProvider {
 		Class clazz = getParamValue(paramMap, ENTITY_TYPE_VAR_NAME, "param1");
 		Sort sort = getParamValue(paramMap, SORT_VAR_NAME, "param2");
 		EntityMetadata meta = getEntityMetadata4Select(clazz);
-		StringBuilder sql = getSelectSQL(meta).append(" order by ").append(meta.orderBy(sort));
+		StringBuilder sql = getSelectSQL(meta);
+		if (Sort.isSorted(sort)) {
+			sql.append(" order by ").append(meta.orderBy(sort, true, colName -> surround(colName)));
+		}
 		return sql.toString();
 	}
 
@@ -122,10 +135,10 @@ public class MybatisSQLProvider {
 		String valueVarName = getParamName(paramMap, VALUE_VAR_NAME, "param3");
 		Sort sort = getParamValue(paramMap, SORT_VAR_NAME, "param4");
 		EntityMetadata meta = getEntityMetadata4Select(clazz);
-		StringBuilder sql = getSelectSQL(meta).append(" where ").append(meta.columnName(name)).append("=#{")
-				.append(valueVarName).append('}');
+		StringBuilder sql = getSelectSQL(meta).append(" where ").append(meta.columnName(name, (s -> surround(s))))
+				.append("=#{").append(valueVarName).append('}');
 		if (Sort.isSorted(sort)) {
-			sql.append(meta.orderBy(sort));
+			sql.append(" order by ").append(meta.orderBy(sort, true, colName -> surround(colName)));
 		}
 		return sql.toString();
 	}
@@ -134,8 +147,9 @@ public class MybatisSQLProvider {
 		Class clazz = getParamValue(paramMap, ENTITY_TYPE_VAR_NAME, "param1");
 		String idVarName = getParamName(paramMap, ID_VAR_NAME, "param2");
 		EntityMetadata meta = getEntityMetadata4Select(clazz);
-		StringBuilder sb = new StringBuilder("SELECT COUNT(*) FROM ").append(meta.tableName()).append(" where ")
-				.append(ID_FIELD_NAME).append("=#{").append(idVarName).append('}');
+		StringBuilder sb = new StringBuilder("SELECT COUNT(*) FROM ").append(surround(meta.tableName()))
+				.append(" where ").append(surround(meta.columnName(meta.pKName()))).append("=#{").append(idVarName)
+				.append('}');
 		return sb.toString();
 	}
 
@@ -146,11 +160,12 @@ public class MybatisSQLProvider {
 		String ignoreIdVarName = getParamName(paramMap, IGNORE_ID_VAR_NAME, "param4");
 		boolean ignoreId = getParamValue(paramMap, IGNORE_ID_VAR_NAME, "param4") != null;
 		EntityMetadata meta = getEntityMetadata4Select(clazz);
-
-		StringBuilder sb = new StringBuilder("SELECT COUNT(*) FROM ").append(meta.tableName()).append(" where ")
-				.append(meta.columnName(name)).append("=#{").append(valueVarName).append('}');
+		StringBuilder sb = new StringBuilder("SELECT COUNT(*) FROM ").append(surround(meta.tableName()))
+				.append(" where ").append(surround(meta.columnName(name))).append("=#{").append(valueVarName)
+				.append('}');
 		if (ignoreId) {
-			sb.append(" and ").append(ID_FIELD_NAME).append("!=#{").append(ignoreIdVarName).append('}');
+			sb.append(" and ").append(surround(meta.columnName(meta.pKName()))).append("!=#{").append(ignoreIdVarName)
+					.append('}');
 		}
 		return sb.toString();
 	}
@@ -160,32 +175,12 @@ public class MybatisSQLProvider {
 		String voVarName = getParamName(paramMap, ENTITY_VAR_NAME, "param1");
 		boolean ignoreNullValue = getParamValue(paramMap, IGNORE_NULL_VALUE_VAR_NAME, "param2");
 		EntityMetadata meta = getEntityMetadata(vo.getClass(), Temporary.class, IgnoreInsert.class);
-		List<String> fList = new ArrayList<>(meta.propertyCount());
-		List<String> vList = new ArrayList<>(meta.propertyCount());
-		for (String name : meta.persistNames()) {
-			if (!meta.canRead(name))
-				continue;
-			boolean insert = false;
-			if ("id".equals(name)) {
-				if (!meta.isNullPropertyValue(vo, name)) {
-					insert = true;
-				}
-			} else if (ignoreNullValue) {
-				if (!meta.isNullPropertyValue(vo, name)) {
-					insert = true;
-				}
-			} else {
-				insert = true;
-			}
-			if (insert) {
-				fList.add(meta.columnName(name));
-				vList.add(new StringBuilder("#{").append(voVarName).append(StringUtil.CHAR_DOT).append(name).append('}')
-						.toString());
-			}
-		}
-		SQL sql = new SQL().INSERT_INTO(meta.tableName()).INTO_COLUMNS(fList.toArray(ArrayUtils.EMPTY_STRING_ARRAY))
-				.INTO_VALUES(vList.toArray(ArrayUtils.EMPTY_STRING_ARRAY));
-		return sql.toString();
+		StringBuilder sb = DaoUtil
+				.getInsertSQL(
+						meta, vo, ignoreNullValue, (name) -> new StringBuilder("#{").append(voVarName)
+								.append(StringUtil.CHAR_DOT).append(name).append('}'),
+						(name, isField) -> surround(name));
+		return sb.toString();
 	}
 
 	public String updateOne(Map<String, Object> paramMap) {
@@ -193,25 +188,14 @@ public class MybatisSQLProvider {
 		String voVarName = getParamName(paramMap, ENTITY_VAR_NAME, "param1");
 		boolean ignoreNullValue = getParamValue(paramMap, IGNORE_NULL_VALUE_VAR_NAME, "param2");
 		EntityMetadata meta = getEntityMetadata(vo.getClass(), Temporary.class, IgnoreUpdate.class);
-		List<String> list = new ArrayList<>(meta.propertyCount());
-		for (String name : meta.persistNames()) {
-			if ("id".equals(name) || !meta.canRead(name))
-				continue;
-			boolean update = false;
-			if (ignoreNullValue) {
-				update = !meta.isNullPropertyValue(vo, name);
-			} else {
-				update = true;
-			}
-			if (update) {
-				CharSequence setV = new StringBuilder(meta.columnName(name)).append("=#{").append(voVarName)
-						.append(StringUtil.CHAR_DOT).append(name).append('}');
-				list.add(setV.toString());
-			}
-		}
-		CharSequence where = new StringBuilder(ID_FIELD_NAME).append("=#{").append(voVarName).append(".id}");
-		SQL sql = new SQL().UPDATE(meta.tableName()).SET(list.toArray(ArrayUtils.EMPTY_STRING_ARRAY))
-				.WHERE(where.toString());
+		StringBuilder sql = DaoUtil
+				.getUpdateSQL(
+						meta, vo, ignoreNullValue, true, (name) -> new StringBuilder("#{").append(voVarName)
+								.append(StringUtil.CHAR_DOT).append(name).append('}'),
+						(name, isField) -> surround(name));
+		String pkName = meta.pKName();
+		sql.append(" where ").append(surround(meta.columnName(pkName))).append("=#{").append(voVarName)
+				.append(StringUtil.CHAR_DOT).append(pkName).append('}');
 		return sql.toString();
 	}
 
@@ -220,17 +204,19 @@ public class MybatisSQLProvider {
 		Map<String, Object> partMap = getParamValue(paramMap, VO_MAP_VAR_NAME, "param2");
 		String voMapVarName = getParamName(paramMap, VO_MAP_VAR_NAME, "param2");
 		EntityMetadata meta = getEntityMetadata(clazz, Temporary.class, IgnoreUpdate.class);
-		List<String> list = new ArrayList<>(partMap.size());
+		List<CharSequence> list = new ArrayList<>(partMap.size());
+		String pkName = meta.pKName();
 		for (String name : partMap.keySet()) {
-			if (!"id".equals(name)) {
-				CharSequence setV = new StringBuilder(meta.columnName(name)).append("=#{").append(voMapVarName)
-						.append(StringUtil.CHAR_DOT).append(name).append('}');
-				list.add(setV.toString());
+			if (!name.equals(pkName)) {
+				CharSequence setV = new StringBuilder(surround(meta.columnName(name))).append("=#{")
+						.append(voMapVarName).append(StringUtil.CHAR_DOT).append(name).append('}');
+				list.add(setV);
 			}
 		}
-		CharSequence where = new StringBuilder(ID_FIELD_NAME).append("=#{").append(voMapVarName).append(".id}");
-		SQL sql = new SQL().UPDATE(meta.tableName()).SET(list.toArray(ArrayUtils.EMPTY_STRING_ARRAY))
-				.WHERE(where.toString());
+		CharSequence where = new StringBuilder(surround(meta.columnName(pkName))).append("=#{").append(voMapVarName)
+				.append(StringUtil.CHAR_DOT).append(pkName).append('}');
+		SQL sql = new SQL().UPDATE(surround(meta.tableName()).toString())
+				.SET(list.toArray(ArrayUtils.EMPTY_STRING_ARRAY)).WHERE(where.toString());
 		return sql.toString();
 	}
 
@@ -261,9 +247,9 @@ public class MybatisSQLProvider {
 		return getEntityMetadata(clazz, Temporary.class, IgnoreSelect.class);
 	}
 
-	private static String whereInById(Iterator<? extends Number> it) {
-		StringBuilder where = new StringBuilder(ID_FIELD_NAME);
-		where.append(" IN (");
+	private static String whereInById(CharSequence idFieldName, Iterator<? extends Number> it) {
+		StringBuilder where = new StringBuilder(idFieldName);
+		where.append(" in (");
 		if (it.hasNext()) {
 			where.append(it.next().longValue());
 		}
@@ -286,8 +272,11 @@ public class MybatisSQLProvider {
 	}
 
 	private static StringBuilder getSelectSQL(EntityMetadata meta) {
-		StringBuilder sql = DaoUtil.getSelectSQL(meta, false,
-				(name, isObjName) -> StringUtil.surround(name, '`').toString());
+		StringBuilder sql = DaoUtil.getSelectSQL(meta, false, (name, isObjName) -> surround(name));
 		return sql;
+	}
+
+	private static CharSequence surround(CharSequence name) {
+		return sqlQuote != null ? StringUtil.surround(name, sqlQuote) : name;
 	}
 }

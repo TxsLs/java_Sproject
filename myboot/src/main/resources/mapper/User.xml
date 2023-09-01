@@ -1,0 +1,111 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="org.teach.study.boot.dao.UserDao">
+	<resultMap id="resultMap" type="User">
+		<id property="id" column="f_id" javaType="long" />
+		<result property="code" column="f_code" javaType="string" />
+		<result property="name" column="f_name" javaType="string" />
+		<result property="descr" column="f_descr" javaType="string" />
+		<result property="sfzh" column="f_sfzh" javaType="string" />
+		<result property="gender" column="f_gender" javaType="int" />
+		<result property="birthday" column="f_birthday"
+			javaType="java.sql.Date" />
+		<result property="deptId" column="f_dept_id" javaType="long" />
+		<result property="jobId" column="f_job_id" javaType="long" />
+		<result property="workstateId" column="f_workstate_id"
+			javaType="long" />
+		<result property="phone" column="f_phone" javaType="string" />
+		<result property="email" column="f_email" javaType="string" />
+		<result property="sale" column="f_sale"
+			javaType="java.math.BigDecimal" />
+		<result property="loves" column="f_loves" javaType="string" />
+		<result property="additionalName" column="f_additional_name"
+			javaType="string" />
+		<result property="additionalFile" column="f_additional_file"
+			javaType="string" />
+	</resultMap>
+
+	<sql id="selectSql">
+		select a.*,a.f_photo_file is not null hasPhoto,
+		d.f_code deptCode, d.f_name deptName,
+		j.f_code jobCode, j.f_name jobName,
+		w.f_code workstateCode, w.f_name workstateName
+		from t_user a
+		left join t_dept d on a.f_dept_id=d.f_id
+		left join t_job j on a.f_job_id=j.f_id
+		left join t_workstate w on a.f_workstate_id=w.f_id
+	</sql>
+
+	<sql id="whereSql">
+		<bind name="condMap" value="condition==null?_parameter:condition" />
+		<where>
+			<if test="condMap.deptId!=null">
+				and a.f_dept_id=#{condMap.deptId}
+			</if>
+			<if test="condMap.jobId!=null">
+				and a.f_job_id=#{condMap.jobId}
+			</if>
+			<if test="condMap.workstateId!=null">
+				and a.f_workstate_id=#{condMap.workstateId}
+			</if>
+			<if test="condMap.code!=null and condMap.code!=''">
+				<bind name="pcode" value="'%'+condMap.code+'%'" />
+				and a.f_code like #{pcode}
+			</if>
+			<if test="condMap.name!=null and condMap.name!=''">
+				<bind name="pname" value="'%'+condMap.name+'%'" />
+				and a.f_name like #{pname}
+			</if>
+		</where>
+	</sql>
+
+	<select id="findPageByCondition" resultMap="resultMap">
+		<include refid="selectSql" />
+		<include refid="whereSql" />
+	</select>	
+
+	<select id="getPhoto" resultType="Photo">
+		select f_id id, f_photo	photo,f_photo_file photoFile 
+		from t_user
+		where f_id=#{id}
+	</select>
+
+	<update id="updatePhoto" parameterType="Photo">
+		update t_user set f_photo=#{photo},f_photo_file=#{photoFile}
+		where f_id=#{id}
+	</update>
+	
+	<update id="updateSelfInfo" parameterType="User">
+		update t_user
+		<set>
+			<if test="name!=null">
+				f_name=#{name},
+			</if>
+			<if test="descr!=null">
+				f_desc=#{descr},
+			</if>
+			<if test="gender!=null">
+				f_gender=#{gender},
+			</if>
+			<if test="sfzh!=null">
+				f_sfzh=#{sfzh},
+			</if>
+			<if test="birthday!=null">
+				f_birthday=#{birthday},
+			</if>			
+			<if test="phone!=null">
+				f_phone=#{phone},
+			</if>
+			<if test="email!=null">
+				f_email=#{email},
+			</if>			
+			<if test="loves!=null">
+				f_loves=#{loves},
+			</if>
+		</set>
+		where f_id=#{id}
+	</update>
+</mapper>
