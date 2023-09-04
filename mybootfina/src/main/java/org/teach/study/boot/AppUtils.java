@@ -1,6 +1,17 @@
 package org.teach.study.boot;
 
+import java.io.IOException;
+import java.io.PrintWriter;
+
+import javax.servlet.ServletResponse;
+import javax.servlet.http.HttpServletResponse;
+
+import org.quincy.rock.core.util.IOUtil;
+import org.quincy.rock.core.util.JsonUtil;
+import org.quincy.rock.core.util.StringUtil;
 import org.quincy.rock.core.vo.PageSet;
+import org.quincy.rock.core.vo.Result;
+import org.springframework.http.MediaType;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.User;
@@ -81,5 +92,17 @@ public abstract class AppUtils {
 	 */
 	public static <E> PageSet<E> toPageSet(Page<E> page) {
 		return PageSet.of(page.getResult(), page.getPageNum(), page.getPageSize(), page.getTotal());
+	}
+
+	public static void writeJson(ServletResponse response, Result<?> result) throws IOException {
+		HttpServletResponse resp = ((HttpServletResponse) response);
+		resp.setContentType(MediaType.APPLICATION_JSON_VALUE);
+		resp.setCharacterEncoding(StringUtil.UTF_8.name());
+		PrintWriter out = resp.getWriter();
+		try {
+			out.write(JsonUtil.toJson(result));
+		} finally {
+			IOUtil.flushAndClose(out);
+		}
 	}
 }

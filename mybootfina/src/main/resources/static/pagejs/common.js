@@ -50,3 +50,4 @@ var mvc = rock.initSvr("_root");
 var _root = mvc.findService("_root");
 _root.addGetMethod("loginUser",true);
 _root.addPostMethod("login",true);
+_root.addGetMethod("logout",true);

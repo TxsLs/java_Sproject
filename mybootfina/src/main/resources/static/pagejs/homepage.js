@@ -13,6 +13,16 @@ $(function($) {
 		}
 	});
 
+	$("#btnLogout").click((evt) => {
+		_root.logout({}, (rtn) => {
+			if (rtn.hasError || !rtn.result) {
+				alert("注销登录出错!");
+			} else {
+				location.href = "index.html";
+			}
+		});
+	});
+
 	loadUser();
 	showLeftMenu();
 });
@@ -167,10 +177,4 @@ function searchLeftMenu(nodeText) {
 		var tv = $("#leftMenu").data("treeview");
 		tv.search(nodeText, { ignoreCase: false, exactMatch: false });
 	}
-};
-
-function logout() {
-	window.location.href = "login.html";
-
-
 };

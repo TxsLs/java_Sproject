@@ -33,6 +33,7 @@ public class JobController extends BaseController<Job, JobService> {
 	@ApiOperation(value = "查询所有实体", notes = "该接口继承自SimpleController")
 	@ApiImplicitParam(name = "sort", value = "排序规则字符串")
 	@RequestMapping(value = "/queryAll", method = { RequestMethod.GET })
+	//@PreAuthorize("hasPermission('/spring-boot','/job','/queryAll')")
 	public @ResponseBody Result<List<? extends Entity>> queryAll(String sort) {
 		log.debug("call queryAll");
 		List<? extends Entity> list = this.service().findAll(null, Sort.parse(sort));
@@ -46,6 +47,7 @@ public class JobController extends BaseController<Job, JobService> {
 			@ApiImplicitParam(name = "pageNum", value = "页码", required = true, dataType = "int"),
 			@ApiImplicitParam(name = "pageSize", value = "页大小", required = true, dataType = "int") })
 	@RequestMapping(value = "/queryPage", method = { RequestMethod.GET })
+	//@PreAuthorize("hasPermission('/spring-boot','/job','/queryPage')")
 	public @ResponseBody Result<PageSet<? extends Entity>> queryPage(String searchCode, String searchName, String sort,
 			@RequestParam("pageNum") int pageNum, @RequestParam int pageSize) {
 		log.debug("call queryPage");

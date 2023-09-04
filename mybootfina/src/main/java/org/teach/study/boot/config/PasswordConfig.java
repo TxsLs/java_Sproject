@@ -33,10 +33,13 @@ import lombok.Setter;
 @ConfigurationProperties(prefix = "encoder.crypt")
 public class PasswordConfig {
 	/**
-	 * KEY。
+	 * SECURE_KEY。
 	 */
-	public static final byte[] KEY = SecurityUtils.correctKey("org.teach.study.boot.user")
-			.getBytes(StringUtil.ISO_8859_1);
+	public static final String SECURE_KEY_STRING = SecurityUtils.correctKey("org.teach.study.boot.user");
+	/**
+	 * SECURE_KEY。
+	 */
+	public static final byte[] SECURE_KEY = SECURE_KEY_STRING.getBytes(StringUtil.ISO_8859_1);
 
 	private int strength = 10;
 	private boolean enable = true;
@@ -52,7 +55,7 @@ public class PasswordConfig {
 	@Bean
 	public PasswordEncoder passwordEncoder() {
 		if (enable) {
-			return new BCryptPasswordEncoder(BCryptVersion.$2A, strength, new SecureRandom(KEY));
+			return new BCryptPasswordEncoder(BCryptVersion.$2A, strength, new SecureRandom(SECURE_KEY));
 		} else {
 			return NoOpPasswordEncoder.getInstance();
 		}

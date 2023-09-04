@@ -41,7 +41,7 @@ import springfox.documentation.annotations.ApiIgnore;
 @Controller
 @RequestMapping("/user")
 public class UserController extends BaseController<User, UserService> {
-	
+
 	@ApiOperation(value = "添加一个实体", notes = "允许文件上传")
 	@ApiImplicitParams({ @ApiImplicitParam(name = "code", value = "代码", required = true, paramType = "form"),
 			@ApiImplicitParam(name = "name", value = "名称", required = true, paramType = "form"),
@@ -157,6 +157,7 @@ public class UserController extends BaseController<User, UserService> {
 	@ApiImplicitParams({ @ApiImplicitParam(name = "code", value = "用户代码", required = true),
 			@ApiImplicitParam(name = "password", value = "新密码", required = true) })
 	@RequestMapping(value = "/resetPwd", method = { RequestMethod.POST })
+	//@Secured({ "ROLE_ADMIN" })
 	public @ResponseBody Result<Boolean> resetPwd(@RequestParam String code, @RequestParam String password) {
 		log.debug("call resetPwd");
 		int n = this.service().changePassword(code, password);

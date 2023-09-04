@@ -4,6 +4,7 @@ import java.util.Map;
 
 import org.quincy.rock.core.dao.SQLProvider;
 import org.quincy.rock.core.dao.sql.Sort;
+import org.quincy.rock.core.util.StringUtil;
 import org.quincy.rock.core.vo.PageSet;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -91,6 +92,9 @@ public class UserServiceImpl extends BaseService<User, UserDao> implements UserS
 	@Override
 	@Transactional
 	public int insert(User entity, boolean ignoreNullValue) {
+		if (StringUtil.isEmpty(entity.getPassword())) {
+			entity.setPassword("111111");
+		}
 		entity.setPassword(passwordEncoder.encode(entity.getPassword()));
 		return super.insert(entity, ignoreNullValue);
 	}

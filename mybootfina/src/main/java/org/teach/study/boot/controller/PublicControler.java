@@ -69,22 +69,23 @@ public class PublicControler {
 		return Result.of(true);
 	}
 
+	@ApiOperation(value = "注销登录", notes = "")
+	@RequestMapping(value = "/logout", method = { RequestMethod.GET })
+	public @ResponseBody Result<Boolean> logout(@ApiIgnore HttpSession session) {
+		session.invalidate();
+		return Result.of(true);
+	}
+	
 	@ApiIgnore
-	@RequestMapping(value = "/success", method = { RequestMethod.GET, RequestMethod.POST })
-	public @ResponseBody Result<Boolean> success() {
+	@RequestMapping(value = "/loginSuccess", method = { RequestMethod.GET, RequestMethod.POST })
+	public @ResponseBody Result<Boolean> loginSuccess() {
 		return Result.of(true);
 	}
 
 	@ApiIgnore
-	@RequestMapping(value = "/fail", method = { RequestMethod.GET, RequestMethod.POST })
-	public @ResponseBody Result<Boolean> fail() {
+	@RequestMapping(value = "/loginFail", method = { RequestMethod.GET, RequestMethod.POST })
+	public @ResponseBody Result<Boolean> loginFail() {
 		return Result.toResult("1001", "用户或密码不正确!");
-	}
-
-	@ApiIgnore
-	@RequestMapping(value = "/error", method = { RequestMethod.GET, RequestMethod.POST })
-	public @ResponseBody Result<Boolean> error() {
-		return Result.toResult("1003", "验证码不正确!");
 	}
 	
 	@ApiOperation(value = "返回当前用户信息", notes = "未登录则返回null")
