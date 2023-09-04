@@ -3,6 +3,7 @@ package org.teach.study.boot.entity;
 import java.math.BigDecimal;
 import java.sql.Date;
 
+import org.quincy.rock.core.dao.annotation.IgnoreInsert;
 import org.quincy.rock.core.dao.annotation.IgnoreUpdate;
 import org.quincy.rock.core.dao.annotation.JoinColumn;
 import org.quincy.rock.core.dao.annotation.Table;
@@ -13,6 +14,7 @@ import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Getter;
 import lombok.Setter;
+import net.bytebuddy.implementation.bind.annotation.IgnoreForBinding;
 
 @Getter
 @Setter
@@ -50,10 +52,14 @@ public class User extends Entity {
 	@JoinColumn(name = "f_id", joinTable = "t_dept", joinAlias = "dept", joinPKName = "f_id", joinFKName = "f_dept_id")
 	private Long deptId;
 
+	@IgnoreUpdate
+	@IgnoreInsert
 	@ApiModelProperty(value = "部门代码", position = 9)
 	@JoinColumn(name = "f_code", joinTable = "t_dept", joinAlias = "dept", joinPKName = "f_id", joinFKName = "f_dept_id")
 	private String deptCode;
 
+	@IgnoreInsert
+	@IgnoreUpdate
 	@ApiModelProperty(value = "部门名称", position = 10)
 	@JoinColumn(name = "f_name", joinTable = "t_dept", joinAlias = "dept", joinPKName = "f_id", joinFKName = "f_dept_id")
 	private String deptName;
@@ -62,10 +68,14 @@ public class User extends Entity {
 	@JoinColumn(name = "f_id", joinTable = "t_job", joinAlias = "job", joinPKName = "f_id", joinFKName = "f_job_id")
 	private Long jobId;
 
+	@IgnoreInsert
+	@IgnoreUpdate
 	@ApiModelProperty(value = "职务代码", position = 12)
 	@JoinColumn(name = "f_code", joinTable = "t_job", joinAlias = "job", joinPKName = "f_id", joinFKName = "f_job_id")
 	private String jobCode;
 
+	@IgnoreInsert
+	@IgnoreUpdate
 	@ApiModelProperty(value = "职务名称", position = 13)
 	@JoinColumn(name = "f_name", joinTable = "t_job", joinAlias = "job", joinPKName = "f_id", joinFKName = "f_job_id")
 	private String jobName;
@@ -74,10 +84,14 @@ public class User extends Entity {
 	@JoinColumn(name = "f_id", joinTable = "t_workstate", joinAlias = "w", joinPKName = "f_id", joinFKName = "f_workstate_id")
 	private Long workstateId;
 
+	@IgnoreInsert
+	@IgnoreUpdate
 	@ApiModelProperty(value = "工作状态代码", position = 15)
 	@JoinColumn(name = "f_code", joinTable = "t_workstate", joinAlias = "w", joinPKName = "f_id", joinFKName = "f_workstate_id")
 	private String workstateCode;
 
+	@IgnoreInsert
+	@IgnoreUpdate
 	@ApiModelProperty(value = "工作状态名称", position = 16)
 	@JoinColumn(name = "f_name", joinTable = "t_workstate", joinAlias = "w", joinPKName = "f_id", joinFKName = "f_workstate_id")
 	private String workstateName;

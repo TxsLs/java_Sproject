@@ -194,7 +194,44 @@ function loadTableData() {
 				return row.workstateName;
 			},
 			sortable: true
-		}, {
+		}, 
+		
+		
+		/*{
+			field: 'gender',
+			title: '性别',
+			align: 'left',
+			valign: 'middle',
+			sortable: true,
+			formatter: function(value, row, index) {
+        return value === 1 ? '男' : '女';
+    }
+		}, 
+		{
+			field: 'jobName',
+			title: '职务',
+			align: 'left',
+			valign: 'middle',
+			sortable: true
+		},
+		{
+			field: 'deptName',
+			title: '部门',
+			align: 'left',
+			valign: 'middle',
+			sortable: true
+		}, 
+		{
+			field: 'workstateName',
+			title: '工作状态',
+			align: 'left',
+			valign: 'middle',
+			sortable: true
+		},*/
+		
+		
+		
+		{
 			title: '操作',
 			align: 'center',
 			valign: 'middle',
