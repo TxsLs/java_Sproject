@@ -1,0 +1,17 @@
+# 后台运行程序
+nohup java -jar /opt/demo/myboot-0.0.1.jar >/opt/demo/myboot.log 2>&1 &
+
+
+
+# test json
+{
+"code":"44444",
+"name":"44444",
+"password":"111111",
+"gender":1,
+"sfzh":"12333333",
+"birthday":"1977-10-10",
+"deptId":1,
+"jobId":1,
+"workstateId":1
+}
