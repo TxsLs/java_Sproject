@@ -4,6 +4,8 @@ import org.quincy.rock.core.dao.annotation.PrimaryKey;
 import org.quincy.rock.core.vo.BaseEntity;
 
 import io.swagger.annotations.ApiModelProperty;
+import lombok.Getter;
+import lombok.Setter;
 
 /**
  * <b>实体基类。</b>
@@ -15,6 +17,8 @@ import io.swagger.annotations.ApiModelProperty;
  * @author mex2000
  * @since 1.0
  */
+@Getter
+@Setter
 public abstract class Entity extends BaseEntity<Long> {
 	/**
 	 * serialVersionUID。
@@ -24,7 +28,7 @@ public abstract class Entity extends BaseEntity<Long> {
 	/**
 	 * 主键id。
 	 */
-	@ApiModelProperty(value="主键id",position = 0)
+	@ApiModelProperty(value = "主键id", position = 0)
 	@PrimaryKey(name = "f_id")
 	private Long id;
 
@@ -47,17 +51,18 @@ public abstract class Entity extends BaseEntity<Long> {
 		return this;
 	}
 
-	/**
-	 * @return the id
-	 */
+	/*	*//**
+			* @return the id
+			*/
+	/*
 	public Long getId() {
-		return id;
+	return id;
 	}
-
-	/**
-	 * @param id the id to set
-	 */
-	public void setId(Long id) {
-		this.id = id;
-	}
+	
+	*//**
+		* @param id the id to set
+		*//*
+			public void setId(Long id) {
+			this.id = id;
+			}*/
 }

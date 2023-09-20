@@ -59,6 +59,7 @@ public class SpringSecurityConfig {
 		provider.setHideUserNotFoundExceptions(false);
 		provider.setUserDetailsService(userDetailsService);
 		provider.setPasswordEncoder(passwordEncoder);
+		
 		return provider;
 	}
 
@@ -75,6 +76,7 @@ public class SpringSecurityConfig {
 	public SessionRegistry sessionRegistry() {
 		//会话管理
 		return new SessionRegistryImpl();
+		
 	}
 
 	//@Bean
